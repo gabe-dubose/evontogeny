@@ -49,23 +49,30 @@ smoothed_transition = gaussian_filter(transition_data.T.iloc[:, :50], sigma=5)
 
 # -------------------------
 fig = plt.figure(figsize=(10, 8), constrained_layout=True)
-# main grid: third row shorter
-gs = gridspec.GridSpec(3, 2, figure=fig, height_ratios=[1, 1, 1.25], hspace=0, wspace=0)
 
-# Top two rows: nested grid with width ratio 1:4
-gs01 = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gs[:2, :], width_ratios=[1, 4], hspace=0)
+# main grid: 3 rows, 1 column
+gs = gridspec.GridSpec(
+    3, 1, figure=fig,
+    height_ratios=[1, 1, 1.25], hspace=0
+)
 
-# Bottom row: equal widths
-gs2 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[2, :], width_ratios=[1, 1])
+# top 2 rows: 1:4 width ratio
+gs_top = gridspec.GridSpecFromSubplotSpec(
+    2, 2, subplot_spec=gs[:2], width_ratios=[1, 4], hspace=0, wspace=0
+)
+
+# bottom row: 1:1 width ratio
+gs_bottom = gridspec.GridSpecFromSubplotSpec(
+    1, 2, subplot_spec=gs[2], width_ratios=[1, 1], wspace=0.1
+)
 
 # assign axes
-ax1 = fig.add_subplot(gs01[0, 0])
-ax2 = fig.add_subplot(gs01[0, 1])
-ax3 = fig.add_subplot(gs01[1, 0])
-ax4 = fig.add_subplot(gs01[1, 1])
-ax5 = fig.add_subplot(gs2[0, 0])
-ax6 = fig.add_subplot(gs2[0, 1])
-
+ax1 = fig.add_subplot(gs_top[0, 0])
+ax2 = fig.add_subplot(gs_top[0, 1])
+ax3 = fig.add_subplot(gs_top[1, 0])
+ax4 = fig.add_subplot(gs_top[1, 1])
+ax5 = fig.add_subplot(gs_bottom[0, 0])
+ax6 = fig.add_subplot(gs_bottom[0, 1])
 # define color scales (shared)
 vmin = min(smoothed_no_transition.min().min(), smoothed_transition.min().min())
 vmax = max(smoothed_no_transition.max().max(), smoothed_transition.max().max())
@@ -132,28 +139,14 @@ cbar_height_factor = 0.925
 
 # colorbar for ax2
 im1 = hm1.collections[0]
-pos2 = ax2.get_position()
-cax1 = fig.add_axes([
-    pos2.x1 + cbar_pad,                                  # x-position
-    pos2.y0 + 0.1*(1-cbar_height_factor)*pos2.height,    # y-position (centered)
-    cbar_width,                                          # width
-    pos2.height * cbar_height_factor                     # height
-])
-cb1 = fig.colorbar(im1, cax=cax1)
+cb1 = fig.colorbar(im1, ax=ax2, location="right", fraction=0.046, pad=0.01)
 cb1.ax.tick_params(labelsize=8)
 cb1.set_label("Var(Expression)", fontsize=12)
 cb1.set_ticks(np.linspace(vmin, vmax, 8))
 
 # colorbar for ax4
 im2 = hm2.collections[0]
-pos4 = ax4.get_position()
-cax2 = fig.add_axes([
-    pos4.x1 + cbar_pad,
-    pos4.y0 + 0.1*(1-cbar_height_factor)*pos4.height,
-    cbar_width,
-    pos4.height * cbar_height_factor
-])
-cb2 = fig.colorbar(im2, cax=cax2)
+cb2 = fig.colorbar(im2, ax=ax4, location="right", fraction=0.046, pad=0.01)
 cb2.ax.tick_params(labelsize=8)
 cb2.set_label("Var(Expression)", fontsize=12)
 cb2.set_ticks(np.linspace(vmin, vmax, 8))
@@ -193,13 +186,13 @@ ax6.set_xlabel(r'$\sigma$', fontsize=12)
 ax6.set_ylabel(r'Equilibrium variance ($V^*$)', fontsize=12)
 
 # panel labels
-ax1.text(-0.2, 0.95, "A", transform=ax1.transAxes,
+ax1.text(-0.25, 0.95, "A", transform=ax1.transAxes,
          fontsize=17, va='bottom', ha='right')
-ax3.text(-0.2, 0.95, "B", transform=ax3.transAxes,
+ax3.text(-0.25, 0.95, "B", transform=ax3.transAxes,
          fontsize=17, va='bottom', ha='right')
-ax5.text(-0.11, 0.95, "C", transform=ax5.transAxes,
+ax5.text(-0.15, 0.95, "C", transform=ax5.transAxes,
          fontsize=17, va='bottom', ha='right')
-ax6.text(-0.115, 0.95, "D", transform=ax6.transAxes,
+ax6.text(-0.15, 0.95, "D", transform=ax6.transAxes,
          fontsize=17, va='bottom', ha='right')
 
 plt.savefig('../figures/variance_analysis.png', dpi=600, bbox_inches='tight')
